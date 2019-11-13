@@ -1,0 +1,40 @@
+{
+    --------------------------------------------
+    Filename: core.con.ina260.spin2
+    Author:
+    Description:
+    Copyright (c) 2019
+    Started Nov 13, 2019
+    Updated Nov 13, 2019
+    See end of file for terms of use.
+    --------------------------------------------
+}
+
+CON
+
+    FAST_MAX            = 400_000
+    HI_MAX              = 2_940_000
+    I2C_MAX_FREQ        = HI_MAX
+
+    SLAVE_ADDR          = $40 << 1
+
+' Register definitions
+
+    CONFIG              = $00
+
+    CURRENT             = $01
+
+    BUS_VOLTAGE         = $02
+
+    POWER               = $03
+
+    MASK_ENABLE         = $06
+
+    ALERT_LIMIT         = $07
+
+    MFR_ID              = $FE
+
+    DIE_ID              = $FF
+
+PUB Null
+'' This is not a top-level object
