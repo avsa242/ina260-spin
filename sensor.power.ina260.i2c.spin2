@@ -81,7 +81,7 @@ PUB Reset | tmp
 ' Reset the chip
 '   NOTE: Equivalent to Power-On Reset
     tmp := 1 << core#FLD_RESET
-    writeReg(core#CONFIG, 1, @tmp)
+    writeReg(core#CONFIG, 2, @tmp)
 
 PUB Voltage
 ' Read the measured bus voltage, in microvolts
