@@ -54,6 +54,26 @@ PUB Current
     result *= 1_250
     return
 
+PUB CurrentConvTime(microseconds=-2) | tmp
+' Set conversion time for shunt current measurement, in microseconds
+'   Valid values: 140, 204, 332, 588, *1100, 2116, 4156, 8244
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#CONFIG, 2, @tmp)
+    case microseconds
+        140, 204, 332, 588, 1100, 2116, 4156, 8244:
+            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#FLD_ISHCT
+        OTHER:
+            tmp >>= core#FLD_ISHCT
+            tmp &= core#BITS_ISHCT
+            result := lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
+            return result
+
+    tmp &= core#MASK_ISHCT
+    tmp := (tmp | microseconds) & core#CONFIG_MASK
+    writeReg(core#CONFIG, 2, @tmp)
+    return tmp
+
 PUB DieID
 ' Read the Die ID from the chip
 '   Returns: $2270
