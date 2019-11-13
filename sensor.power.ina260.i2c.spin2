@@ -83,6 +83,26 @@ PUB Reset | tmp
     tmp := 1 << core#FLD_RESET
     writeReg(core#CONFIG, 2, @tmp)
 
+PUB SamplesAveraged(samples=-2) | tmp
+' Set number of samples used for averaging measurements
+'   Valid values: *1, 4, 16, 64, 128, 256, 512, 1024
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#CONFIG, 2, @tmp)
+    case samples
+        1, 4, 16, 64, 128, 256, 512, 1024:
+            samples := lookdownz(samples: 1, 4, 16, 64, 128, 256, 512, 1024) << core#FLD_AVG
+        OTHER:
+            tmp >>= core#FLD_AVG
+            tmp &= core#BITS_AVG
+            result := lookupz(tmp: 1, 4, 16, 64, 128, 256, 512, 1024)
+            return result
+
+    tmp &= core#MASK_AVG
+    tmp := (tmp | samples) & core#CONFIG_MASK
+    writeReg(core#CONFIG, 2, @tmp)
+    return tmp
+
 PUB Voltage
 ' Read the measured bus voltage, in microvolts
 '   NOTE: If averaging is enabled, this will return the averaged value
@@ -113,20 +133,22 @@ PRI readReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 
 PRI writeReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 '' Write num_bytes to the slave device from the address stored in buff_addr
-    case reg                                                    'Basic register validation
-        $00..$FF:                                               ' Consult your device's datasheet!
-            cmd_packet.byte[0] := SLAVE_WR
-            cmd_packet.byte[1] := reg
-            i2c.Start                                               ' S
-            repeat tmp from 0 to 1
-                i2c.Write(cmd_packet.byte[tmp])                     ' SL|W, reg
-
-            repeat tmp from 0 to nr_bytes-1
-                i2c.Write (byte[buff_addr][tmp])                    ' W 0..n
-            i2c.Stop                                                ' P
+    case reg                                                ' Basic register validation
+        $00:
+            word[buff_addr][0] |= core#BITS_RSVD            ' Make sure the reserved bits are set correctly
+        $06, $07:
         OTHER:
             return
 
+    cmd_packet.byte[0] := SLAVE_WR
+    cmd_packet.byte[1] := reg
+    i2c.Start                                               ' S
+    repeat tmp from 0 to 1
+        i2c.Write(cmd_packet.byte[tmp])                     ' SL|W, reg
+
+    repeat tmp from nr_bytes-1 to 0' to nr_bytes-1
+        i2c.Write (byte[buff_addr][tmp])                    ' W 0..n
+    i2c.Stop                                                ' P
 
 DAT
 {

@@ -21,12 +21,13 @@ CON
 ' Register definitions
 
     CONFIG              = $00
-    CONFIG_MASK         = $8F
+    CONFIG_MASK         = $8FFF
         FLD_RESET       = 15
         FLD_AVG         = 9
         FLD_VBUSCT      = 6
         FLD_ISHCT       = 3
         FLD_MODE        = 0
+        BITS_RSVD       = %110 << 12    ' Reserved bits
         BITS_AVG        = %111
         BITS_VBUSCT     = %111
         BITS_ISHCT      = %111
