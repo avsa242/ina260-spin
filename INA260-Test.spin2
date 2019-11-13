@@ -47,8 +47,19 @@ PUB Main
     ser.Position(0, _row)
     _expanded := FALSE
 
+
+    VBUSCT(1)
     AVG(1)
     FlashLED(LED, 100)     ' Signal execution finished
+
+PUB VBUSCT(reps) | tmp, read
+
+    _row++
+    repeat reps
+        repeat tmp from 0 to 7
+            ina260.VoltageConvTime(lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244))
+            read := ina260.VoltageConvTime
+            Message ("VBUSCT", lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244), read)
 
 PUB AVG(reps) | tmp, read
 

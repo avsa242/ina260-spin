@@ -113,6 +113,26 @@ PUB Voltage
     result *= 1_250
     return result
 
+PUB VoltageConvTime(microseconds=-2) | tmp
+' Set conversion time for bus voltage measurement, in microseconds
+'   Valid values: 140, 204, 332, 588, *1100, 2116, 4156, 8244
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#CONFIG, 2, @tmp)
+    case microseconds
+        140, 204, 332, 588, 1100, 2116, 4156, 8244:
+            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#FLD_VBUSCT
+        OTHER:
+            tmp >>= core#FLD_VBUSCT
+            tmp &= core#BITS_VBUSCT
+            result := lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
+            return result
+
+    tmp &= core#MASK_VBUSCT
+    tmp := (tmp | microseconds) & core#CONFIG_MASK
+    writeReg(core#CONFIG, 2, @tmp)
+    return tmp
+
 PRI readReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 '' Read num_bytes from the slave device into the address stored in buff_addr
     case reg                                                    'Basic register validation
