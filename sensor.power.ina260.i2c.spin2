@@ -44,13 +44,48 @@ PUB Start(SCL_PIN, SDA_PIN, I2C_HZ=100_000): okay
 PUB Stop
 ' Put any other housekeeping code here required/recommended by your device before shutting down
 
-PUB DieID
+PUB Current
+' Read the measured current, in microamperes
+'   NOTE: If averaging is enabled, this will return the averaged value
+    result := $0000
+    readReg(core#CURRENT, 2, @result)
+    if result > 32767
+        result := 65536-result
+    result *= 1_250
+    return
 
+PUB DieID
+' Read the Die ID from the chip
+'   Returns: $2270
+    result := $0000
     readReg(core#DIE_ID, 2, @result)
+    return
 
 PUB MfrID
-
+' Read the Manufacturer ID from the chip
+'   Returns: $5449
+    result := $0000
     readReg(core#MFR_ID, 2, @result)
+    return
+
+PUB Power
+' Read the power measured by the chip, in microwatts
+'   NOTE: If averaging is enabled, this will return the averaged value
+'   NOTE: The maximum value returned is 419_430_000
+    result := $0000
+    readReg(core#POWER, 2, @result)
+    result *= 10_000
+    return
+
+PUB Voltage
+' Read the measured bus voltage, in microvolts
+'   NOTE: If averaging is enabled, this will return the averaged value
+'   NOTE: Full-scale range is 40_960_000uV
+    result := $0000
+    readReg(core#BUS_VOLTAGE, 2, @result)
+    result &= $7FFF
+    result *= 1_250
+    return result
 
 PRI readReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 '' Read num_bytes from the slave device into the address stored in buff_addr

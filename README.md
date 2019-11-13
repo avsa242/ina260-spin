@@ -1,27 +1,27 @@
 # ina260-spin2 
 --------------
 
-This is a P8X32A/Propeller [driver] object for ____.
+This is a P2X8C4M64P/Propeller 2 driver object for the TI INA260 Precision Current and Power monitor IC
 
 ## Salient Features
 
-* Feature 1
-* Feature 2
+* I2C connection at up to 400kHz
+* Read manufacturer ID, die ID
 
 ## Requirements
 
-* Requirement 1
+* N/A
 
 ## Compiler Compatibility
 
-* OpenSpin (tested with 1.00.81)
+* FastSpin (tested with 4.0.3-beta)
 
 ## Limitations
 
 * Very early in development - may malfunction, or outright fail to build
-* Limitation 2
 
 ## TODO
 
-- [ ] Task item 1
-- [ ] Task item 2
+- [x] Implement methods for reading the three measurements
+- [ ] Implement methods for configuring the chip
+- [ ] Implement methods for setting alerts
