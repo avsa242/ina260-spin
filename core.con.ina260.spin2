@@ -21,6 +21,21 @@ CON
 ' Register definitions
 
     CONFIG              = $00
+    CONFIG_MASK         = $8F
+        FLD_RESET       = 15
+        FLD_AVG         = 9
+        FLD_VBUSCT      = 6
+        FLD_ISHCT       = 3
+        FLD_MODE        = 0
+        BITS_AVG        = %111
+        BITS_VBUSCT     = %111
+        BITS_ISHCT      = %111
+        BITS_MODE       = %111
+        MASK_RESET      = CONFIG_MASK ^ (1 << FLD_RESET)
+        MASK_AVG        = CONFIG_MASK ^ (BITS_AVG << FLD_AVG)
+        MASK_VBUSCT     = CONFIG_MASK ^ (BITS_VBUSCT << FLD_VBUSCT)
+        MASK_ISHCT      = CONFIG_MASK ^ (BITS_ISHCT << FLD_ISHCT)
+        MASK_MODE       = CONFIG_MASK ^ (BITS_MODE << FLD_MODE)
 
     CURRENT             = $01
 

@@ -1,8 +1,8 @@
 {
     --------------------------------------------
     Filename: sensor.power.ina260.i2c.spin2
-    Author:
-    Description:
+    Author: Jesse Burt
+    Description: Driver for the TI INA260 Precision Current and Power Monitor IC
     Copyright (c) 2019
     Started Nov 13, 2019
     Updated Nov 13, 2019
@@ -76,6 +76,12 @@ PUB Power
     readReg(core#POWER, 2, @result)
     result *= 10_000
     return
+
+PUB Reset | tmp
+' Reset the chip
+'   NOTE: Equivalent to Power-On Reset
+    tmp := 1 << core#FLD_RESET
+    writeReg(core#CONFIG, 1, @tmp)
 
 PUB Voltage
 ' Read the measured bus voltage, in microvolts
