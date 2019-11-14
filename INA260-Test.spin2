@@ -47,10 +47,20 @@ PUB Main
     ser.Position(0, _row)
     _expanded := FALSE
 
+    MODE(1)
     ISHCT(1)
     VBUSCT(1)
     AVG(1)
     FlashLED(LED, 100)     ' Signal execution finished
+
+PUB MODE(reps) | tmp, read
+
+    _row++
+    repeat reps
+        repeat tmp from 0 to 7
+            ina260.Opmode(tmp)
+            read := ina260.OpMode
+            Message ("MODE", tmp, read)
 
 PUB ISHCT(reps) | tmp, read
 
@@ -60,7 +70,6 @@ PUB ISHCT(reps) | tmp, read
             ina260.CurrentConvTime(lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244))
             read := ina260.CurrentConvTime
             Message ("ISHCT", lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244), read)
-
 
 PUB VBUSCT(reps) | tmp, read
 

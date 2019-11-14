@@ -12,11 +12,21 @@
 
 CON
 
-    SLAVE_WR          = core#SLAVE_ADDR
-    SLAVE_RD          = core#SLAVE_ADDR|1
+    SLAVE_WR        = core#SLAVE_ADDR
+    SLAVE_RD        = core#SLAVE_ADDR|1
 
-    DEF_HZ            = 100_000
-    I2C_MAX_FREQ      = core#I2C_MAX_FREQ
+    DEF_HZ          = 100_000
+    I2C_MAX_FREQ    = core#I2C_MAX_FREQ
+
+' Operating modes
+    POWERDN         = %000
+    CURR_TRIGD      = %001
+    VOLT_TRIGD      = %010
+    CURR_VOLT_TRIGD = %011
+    POWERDN2        = %100
+    CURR_CONT       = %101
+    VOLT_CONT       = %110
+    CURR_VOLT_CONT  = %111
 
 VAR
 
@@ -72,7 +82,6 @@ PUB CurrentConvTime(microseconds=-2) | tmp
     tmp &= core#MASK_ISHCT
     tmp := (tmp | microseconds) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
-    return tmp
 
 PUB DieID
 ' Read the Die ID from the chip
@@ -87,6 +96,31 @@ PUB MfrID
     result := $0000
     readReg(core#MFR_ID, 2, @result)
     return
+
+PUB OpMode(mode=-2) | tmp
+' Set operation mode
+'   Valid values:
+'       POWERDN (0): Power-down/shutdown
+'       CURR_TRIGD (1): Shunt current, triggered
+'       VOLT_TRIGD (2): Bus voltage, triggered
+'       CURR_VOLT_TRIGD (3): Shunt current and bus voltage, triggered
+'       POWERDN2 (4): Power-down/shutdown
+'       CURR_CONT (5): Shunt current, continuous
+'       VOLT_CONT (6): Bus voltage, continuous
+'      *CURR_VOLT_CONT (7): Shunt current and bus voltage, continuous
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#CONFIG, 2, @tmp)
+    case mode
+        POWERDN, CURR_TRIGD, VOLT_TRIGD, CURR_VOLT_TRIGD, POWERDN2, CURR_CONT, VOLT_CONT, CURR_VOLT_CONT:
+            mode := lookdownz(mode: POWERDN, CURR_TRIGD, VOLT_TRIGD, CURR_VOLT_TRIGD, POWERDN2, CURR_CONT, VOLT_CONT, CURR_VOLT_CONT)
+        OTHER:
+            tmp &= core#BITS_MODE
+            return tmp
+
+    tmp &= core#MASK_MODE
+    tmp := (tmp | mode) & core#CONFIG_MASK
+    writeReg(core#CONFIG, 2, @tmp)
 
 PUB Power
 ' Read the power measured by the chip, in microwatts
@@ -121,7 +155,6 @@ PUB SamplesAveraged(samples=-2) | tmp
     tmp &= core#MASK_AVG
     tmp := (tmp | samples) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
-    return tmp
 
 PUB Voltage
 ' Read the measured bus voltage, in microvolts
@@ -151,7 +184,6 @@ PUB VoltageConvTime(microseconds=-2) | tmp
     tmp &= core#MASK_VBUSCT
     tmp := (tmp | microseconds) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
-    return tmp
 
 PRI readReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 '' Read num_bytes from the slave device into the address stored in buff_addr
