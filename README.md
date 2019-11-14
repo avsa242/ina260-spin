@@ -7,6 +7,10 @@ This is a P2X8C4M64P/Propeller 2 driver object for the TI INA260 Precision Curre
 
 * I2C connection at up to 400kHz
 * Read manufacturer ID, die ID
+* Read shunt current, bus voltage, calculated power
+* Set operation mode (one-shot/triggered, continuous, power-down)
+* Set conversion time for voltage and current measurements
+* Set measurement averaging samples
 
 ## Requirements
 
@@ -23,5 +27,5 @@ This is a P2X8C4M64P/Propeller 2 driver object for the TI INA260 Precision Curre
 ## TODO
 
 - [x] Implement methods for reading the three measurements
-- [ ] Implement methods for configuring the chip
-- [ ] Implement methods for setting alerts
+- [x] Implement methods for configuring the chip
+- [ ] Implement methods for setting alerts - WIP
