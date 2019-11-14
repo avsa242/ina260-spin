@@ -36,6 +36,10 @@ CON
     INT_CURRENT_LO  = 16
     INT_CURRENT_HI  = 32
 
+' Interrupt/alert pin level/polarity
+    INTLVL_LO       = 0
+    INTLVL_HI       = 1
+
 VAR
 
 
@@ -105,6 +109,26 @@ PUB DieID
     result := $0000
     readReg(core#DIE_ID, 2, @result)
     return
+
+PUB IntLevel (level=-2) | tmp
+' Set interrupt active level/polarity
+'   Valid values:
+'      *INTLVL_LO   (0) Active low
+'       INTLVL_HI   (1) Active high
+'   Any other value polls the chip and returns the current setting
+'   NOTE: The ALERT pin is open collector
+    tmp := $0000
+    readReg(core#MASK_ENABLE, 2, @tmp)
+    case level
+        INTLVL_LO, INTLVL_HI:
+            level <<= core#FLD_APOL
+        OTHER:
+            tmp >>= core#FLD_APOL
+            return tmp
+
+    tmp &= core#MASK_APOL
+    tmp := (tmp | level) & core#MASK_ENABLE_MASK
+    writeReg(core#MASK_ENABLE, 2, @tmp)
 
 PUB IntSource (src=-2) | tmp
 ' Set interrupt/alert pin assertion source

@@ -47,12 +47,23 @@ PUB Main
     ser.Position(0, _row)
     _expanded := FALSE
 
+    APOL(1)
     MASKENABLE(1)
     MODE(1)
     ISHCT(1)
     VBUSCT(1)
     AVG(1)
     FlashLED(LED, 100)     ' Signal execution finished
+
+PUB APOL(reps) | tmp, read
+
+    _row++
+    repeat reps
+        repeat tmp from 0 to 1
+            ina260.IntLevel(tmp)
+            read := ina260.IntLevel
+            Message ("APOL", tmp, read)
+
 
 PUB MASKENABLE(reps) | tmp, read
 
