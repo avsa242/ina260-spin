@@ -11,6 +11,8 @@ This is a P2X8C4M64P/Propeller 2 driver object for the TI INA260 Precision Curre
 * Set operation mode (one-shot/triggered, continuous, power-down)
 * Set conversion time for voltage and current measurements
 * Set measurement averaging samples
+* Set interrupt/alert source, threshold, active state (open-collector high/low), latching
+* Read flags: conversion ready, power overflowed
 
 ## Requirements
 
@@ -28,4 +30,5 @@ This is a P2X8C4M64P/Propeller 2 driver object for the TI INA260 Precision Curre
 
 - [x] Implement methods for reading the three measurements
 - [x] Implement methods for configuring the chip
-- [ ] Implement methods for setting alerts - WIP
+- [x] Implement methods for setting interrupts/alerts
+- [ ] Modify the alert threshold setting to accept natural values rather than a raw word

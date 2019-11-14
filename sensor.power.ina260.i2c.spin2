@@ -5,7 +5,7 @@
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
     Copyright (c) 2019
     Started Nov 13, 2019
-    Updated Nov 13, 2019
+    Updated Nov 14, 2019
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -172,6 +172,19 @@ PUB IntSource (src=-2) | tmp
     tmp &= core#MASK_ALERTS
     tmp := (tmp | src) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
+
+PUB IntThresh(threshold=-2) | tmp
+' Set interrupt/alert threshold
+'   Valid values: 0..65535
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#ALERT_LIMIT, 2, @tmp)
+    case threshold
+        0..65535:
+        OTHER:
+            return tmp
+
+    writeReg(core#ALERT_LIMIT, 2, @threshold)
 
 PUB MfrID
 ' Read the Manufacturer ID from the chip
