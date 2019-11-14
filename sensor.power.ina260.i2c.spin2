@@ -62,6 +62,14 @@ PUB Start(SCL_PIN, SDA_PIN, I2C_HZ=100_000): okay
 PUB Stop
 ' Put any other housekeeping code here required/recommended by your device before shutting down
 
+PUB ConversionReady
+' Indicates data from the last conversion is available for reading
+'   Returns: TRUE if data available, FALSE otherwise
+    readReg(core#MASKENABLE, 2, @result)
+    result >>= core#FLD_CVRF
+    result &= %1
+    result *= TRUE
+
 PUB Current
 ' Read the measured current, in microamperes
 '   NOTE: If averaging is enabled, this will return the averaged value
