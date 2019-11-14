@@ -90,6 +90,34 @@ PUB DieID
     readReg(core#DIE_ID, 2, @result)
     return
 
+PUB IntMask (mask=-2) | tmp
+' Set interrupt/alert pin assertion mask
+'   Valid values:
+'       Bit     Field
+'       5       Over current limit
+'       4       Under current limit
+'       3       Bus voltage over-voltage
+'       2       Bus voltage under-voltage
+'       1       Power over-limit
+'       0       Conversion ready
+'   Example:
+'       IntMask (%001000) would configure the sensor to assert the ALERT pin
+'           when the Bus voltage rises above the set threshold
+'   NOTE: If multiple bits are enabled, the most significant set bit takes priority
+'   Any other value polls the chip and returns the current setting
+    tmp := $0000
+    readReg(core#MASK_ENABLE, 2, @tmp)
+    case mask
+        %000000..%111111:
+            mask <<= core#FLD_ALERTS
+        OTHER:
+            tmp >>= core#FLD_ALERTS
+            return tmp
+
+    tmp &= core#MASK_ALERTS
+    tmp := (tmp | mask) & core#MASK_ENABLE_MASK
+    writeReg(core#MASK_ENABLE, 2, @tmp)
+
 PUB MfrID
 ' Read the Manufacturer ID from the chip
 '   Returns: $5449
