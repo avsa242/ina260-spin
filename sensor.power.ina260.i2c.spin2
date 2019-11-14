@@ -28,6 +28,14 @@ CON
     VOLT_CONT       = %110
     CURR_VOLT_CONT  = %111
 
+' Interrupt/alert pin sources
+    INT_CONV_READY  = 1
+    INT_POWER_HI    = 2
+    INT_BUSVOLT_LO  = 4
+    INT_BUSVOLT_HI  = 8
+    INT_CURRENT_LO  = 16
+    INT_CURRENT_HI  = 32
+
 VAR
 
 
@@ -90,32 +98,30 @@ PUB DieID
     readReg(core#DIE_ID, 2, @result)
     return
 
-PUB IntMask (mask=-2) | tmp
-' Set interrupt/alert pin assertion mask
+PUB IntSource (src=-2) | tmp
+' Set interrupt/alert pin assertion source
 '   Valid values:
-'       Bit     Field
-'       5       Over current limit
-'       4       Under current limit
-'       3       Bus voltage over-voltage
-'       2       Bus voltage under-voltage
-'       1       Power over-limit
-'       0       Conversion ready
-'   Example:
-'       IntMask (%001000) would configure the sensor to assert the ALERT pin
-'           when the Bus voltage rises above the set threshold
-'   NOTE: If multiple bits are enabled, the most significant set bit takes priority
+'       INT_CURRENT_HI  (32)    Over current limit
+'       INT_CURRENT_LO  (16)    Under current limit
+'       INT_BUSVOLT_HI  (8)     Bus voltage over-voltage
+'       INT_BUSVOLT_LO  (4)     Bus voltage under-voltage
+'       INT_POWER_HI    (2)     Power over-limit
+'       INT_CONV_READY  (1)     Conversion ready
+'       Example:
+'           IntSource(INT_BUSVOLT_HI) or IntSource(8)
+'               would trigger an alert when the bus voltage exceeded the set threshold
 '   Any other value polls the chip and returns the current setting
     tmp := $0000
     readReg(core#MASK_ENABLE, 2, @tmp)
-    case mask
-        %000000..%111111:
-            mask <<= core#FLD_ALERTS
+    case src
+        INT_CONV_READY, INT_POWER_HI, INT_BUSVOLT_LO, INT_BUSVOLT_HI, INT_CURRENT_LO, INT_CURRENT_HI:
+            src <<= core#FLD_ALERTS
         OTHER:
             tmp >>= core#FLD_ALERTS
             return tmp
 
     tmp &= core#MASK_ALERTS
-    tmp := (tmp | mask) & core#MASK_ENABLE_MASK
+    tmp := (tmp | src) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
 
 PUB MfrID

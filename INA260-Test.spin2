@@ -47,21 +47,21 @@ PUB Main
     ser.Position(0, _row)
     _expanded := FALSE
 
-    ALERT(1)
+    MASKENABLE(1)
     MODE(1)
     ISHCT(1)
     VBUSCT(1)
     AVG(1)
     FlashLED(LED, 100)     ' Signal execution finished
 
-PUB ALERT(reps) | tmp, read
+PUB MASKENABLE(reps) | tmp, read
 
     _row++
     repeat reps
-        repeat tmp from %000000 to %111111
-            ina260.IntMask(tmp)
-            read := ina260.IntMask
-            Message ("ALERT", tmp, read)
+        repeat tmp from 0 to 5
+            ina260.IntSource(1 << tmp)
+            read := ina260.IntSource
+            Message ("MASKENABLE", 1 << tmp, read)
 
 PUB MODE(reps) | tmp, read
 
