@@ -173,6 +173,13 @@ PUB Power
     result *= 10_000
     return
 
+PUB PowerOverflowed
+' Indicates the power data exceeded the maximum measurable value (419_430_000uW/419.43W)
+    readReg(core#MASKENABLE, 2, @result)
+    result >>= core#FLD_OVF
+    result &= %1
+    result *= TRUE
+
 PUB Reset | tmp
 ' Reset the chip
 '   NOTE: Equivalent to Power-On Reset
