@@ -130,6 +130,23 @@ PUB IntLevel (level=-2) | tmp
     tmp := (tmp | level) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
 
+PUB IntsLatched(enabled=-2) | tmp
+' Enable latching of interrupts
+'   Valid values:
+'       TRUE (-1 or 1): Active interrupts remain asserted until cleared manually
+'       FALSE (0): Active interrupts clear when the fault has been cleared
+    tmp := $0000
+    readReg(core#MASK_ENABLE, 2, @tmp)
+    case ||enabled
+        0, 1:
+            enabled := ||enabled & %1
+        OTHER:
+            return (tmp & %1) * TRUE
+
+    tmp &= core#MASK_LEN
+    tmp := (tmp | enabled) & core#MASK_ENABLE_MASK
+    writeReg(core#MASK_ENABLE, 2, @tmp)
+
 PUB IntSource (src=-2) | tmp
 ' Set interrupt/alert pin assertion source
 '   Valid values:

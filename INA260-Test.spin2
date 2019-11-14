@@ -47,6 +47,7 @@ PUB Main
     ser.Position(0, _row)
     _expanded := FALSE
 
+    LEN(1)
     APOL(1)
     MASKENABLE(1)
     MODE(1)
@@ -54,6 +55,15 @@ PUB Main
     VBUSCT(1)
     AVG(1)
     FlashLED(LED, 100)     ' Signal execution finished
+
+PUB LEN(reps) | tmp, read
+
+    _row++
+    repeat reps
+        repeat tmp from -1 to 0
+            ina260.IntsLatched(tmp)
+            read := ina260.IntsLatched
+            Message ("LEN", tmp, read)
 
 PUB APOL(reps) | tmp, read
 
@@ -63,7 +73,6 @@ PUB APOL(reps) | tmp, read
             ina260.IntLevel(tmp)
             read := ina260.IntLevel
             Message ("APOL", tmp, read)
-
 
 PUB MASKENABLE(reps) | tmp, read
 
