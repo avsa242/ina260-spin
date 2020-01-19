@@ -75,6 +75,16 @@ PUB Stop
 ' Put any other housekeeping code here required/recommended by your device before shutting down
     i2c.Stop
 
+PUB BusVoltage
+' Read the measured bus voltage, in microvolts
+'   NOTE: If averaging is enabled, this will return the averaged value
+'   NOTE: Full-scale range is 40_960_000uV
+    result := $0000
+    readReg(core#BUS_VOLTAGE, 2, @result)
+    result &= $7FFF
+    result *= 1_250
+    return result
+
 PUB ConversionReady
 ' Indicates data from the last conversion is available for reading
 '   Returns: TRUE if data available, FALSE otherwise
@@ -274,16 +284,6 @@ PUB SamplesAveraged(samples) | tmp
     tmp &= core#MASK_AVG
     tmp := (tmp | samples) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
-
-PUB Voltage
-' Read the measured bus voltage, in microvolts
-'   NOTE: If averaging is enabled, this will return the averaged value
-'   NOTE: Full-scale range is 40_960_000uV
-    result := $0000
-    readReg(core#BUS_VOLTAGE, 2, @result)
-    result &= $7FFF
-    result *= 1_250
-    return result
 
 PUB VoltageConvTime(microseconds) | tmp
 ' Set conversion time for bus voltage measurement, in microseconds

@@ -48,8 +48,8 @@ PUB Main
         Frac(ina260.Current)
         ser.str(string("mA   ", ser#CR, ser#LF))
 
-        ser.str(string("Voltage: "))
-        Frac(ina260.Voltage)
+        ser.str(string("Bus Voltage: "))
+        Frac(ina260.BusVoltage)
         ser.str(string("mV   ", ser#CR, ser#LF))
 
         ser.str(string("Power: "))
