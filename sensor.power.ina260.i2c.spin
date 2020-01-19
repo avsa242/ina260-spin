@@ -15,6 +15,8 @@ CON
     SLAVE_WR        = core#SLAVE_ADDR
     SLAVE_RD        = core#SLAVE_ADDR|1
 
+    DEF_SCL         = 28
+    DEF_SDA         = 29
     DEF_HZ          = 100_000
     I2C_MAX_FREQ    = core#I2C_MAX_FREQ
 
@@ -45,26 +47,33 @@ VAR
 
 OBJ
 
-    i2c : "com.i2c"                                             'PASM I2C Driver
-    core: "core.con.ina260.spin2"                       'File containing your device's register set
-    time: "time"                                                'Basic timing functions
+    i2c : "com.i2c"
+    core: "core.con.ina260"
+    time: "time"
 
 PUB Null
 ''This is not a top-level object
 
-PUB Start(SCL_PIN, SDA_PIN, I2C_HZ=100_000): okay
+PUB Start: okay
 
-    if lookdown(SCL_PIN: 0..63) and lookdown(SDA_PIN: 0..63)
+    okay := Startx(DEF_SCL, DEF_SDA, DEF_HZ)
+
+PUB Startx(SCL_PIN, SDA_PIN, I2C_HZ): okay
+
+    if lookdown(SCL_PIN: 0..31) and lookdown(SDA_PIN: 0..31)
         if I2C_HZ =< core#I2C_MAX_FREQ
-            if okay := i2c.Setup (SCL_PIN, SDA_PIN, I2C_HZ)     'I2C Object Started?
+            if okay := i2c.Setupx (SCL_PIN, SDA_PIN, I2C_HZ)     'I2C Object Started?
                 time.MSleep (1)
                 if i2c.Present (SLAVE_WR)                       'Response from device?
+                    Reset
+                    if DeviceID == core#DEVID_RESP
                     return okay
 
     return FALSE                                                'If we got here, something went wrong
 
 PUB Stop
 ' Put any other housekeeping code here required/recommended by your device before shutting down
+    i2c.Stop
 
 PUB ConversionReady
 ' Indicates data from the last conversion is available for reading
@@ -84,7 +93,7 @@ PUB Current
     result *= 1_250
     return
 
-PUB CurrentConvTime(microseconds=-2) | tmp
+PUB CurrentConvTime(microseconds) | tmp
 ' Set conversion time for shunt current measurement, in microseconds
 '   Valid values: 140, 204, 332, 588, *1100, 2116, 4156, 8244
 '   Any other value polls the chip and returns the current setting
@@ -117,7 +126,7 @@ PUB DieID
     readReg(core#DIE_ID, 2, @result)
     return
 
-PUB IntLevel (level=-2) | tmp
+PUB IntLevel (level) | tmp
 ' Set interrupt active level/polarity
 '   Valid values:
 '      *INTLVL_LO   (0) Active low
@@ -137,7 +146,7 @@ PUB IntLevel (level=-2) | tmp
     tmp := (tmp | level) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
 
-PUB IntsLatched(enabled=-2) | tmp
+PUB IntsLatched(enabled) | tmp
 ' Enable latching of interrupts
 '   Valid values:
 '       TRUE (-1 or 1): Active interrupts remain asserted until cleared manually
@@ -154,7 +163,7 @@ PUB IntsLatched(enabled=-2) | tmp
     tmp := (tmp | enabled) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
 
-PUB IntSource (src=-2) | tmp
+PUB IntSource (src) | tmp
 ' Set interrupt/alert pin assertion source
 '   Valid values:
 '       INT_CURRENT_HI  (32)    Over current limit
@@ -180,7 +189,7 @@ PUB IntSource (src=-2) | tmp
     tmp := (tmp | src) & core#MASK_ENABLE_MASK
     writeReg(core#MASK_ENABLE, 2, @tmp)
 
-PUB IntThresh(threshold=-2) | tmp
+PUB IntThresh(threshold) | tmp
 ' Set interrupt/alert threshold
 '   Valid values: 0..65535
 '   Any other value polls the chip and returns the current setting
@@ -200,7 +209,7 @@ PUB MfrID
     readReg(core#MFR_ID, 2, @result)
     return
 
-PUB OpMode(mode=-2) | tmp
+PUB OpMode(mode) | tmp
 ' Set operation mode
 '   Valid values:
 '       POWERDN (0): Power-down/shutdown
@@ -247,7 +256,7 @@ PUB Reset | tmp
     tmp := 1 << core#FLD_RESET
     writeReg(core#CONFIG, 2, @tmp)
 
-PUB SamplesAveraged(samples=-2) | tmp
+PUB SamplesAveraged(samples) | tmp
 ' Set number of samples used for averaging measurements
 '   Valid values: *1, 4, 16, 64, 128, 256, 512, 1024
 '   Any other value polls the chip and returns the current setting
@@ -276,7 +285,7 @@ PUB Voltage
     result *= 1_250
     return result
 
-PUB VoltageConvTime(microseconds=-2) | tmp
+PUB VoltageConvTime(microseconds) | tmp
 ' Set conversion time for bus voltage measurement, in microseconds
 '   Valid values: 140, 204, 332, 588, *1100, 2116, 4156, 8244
 '   Any other value polls the chip and returns the current setting
@@ -328,7 +337,7 @@ PRI writeReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
     repeat tmp from 0 to 1
         i2c.Write(cmd_packet.byte[tmp])                     ' SL|W, reg
 
-    repeat tmp from nr_bytes-1 to 0' to nr_bytes-1
+    repeat tmp from nr_bytes-1 to 0
         i2c.Write (byte[buff_addr][tmp])                    ' W 0..n
     i2c.Stop                                                ' P
 

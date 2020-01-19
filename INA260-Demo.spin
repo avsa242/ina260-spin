@@ -2,9 +2,9 @@
     --------------------------------------------
     Filename: INA260-Demo.spin2
     Author: Jesse Burt
-    Description: Simple demo of the INA260 driver (P2 version)
+    Description: Simple demo of the INA260 driver
     Copyright (c) 2020
-    Started Nov 13, 2019
+    Started Jan 18, 2020
     Updated Jan 18, 2020
     See end of file for terms of use.
     --------------------------------------------
@@ -12,33 +12,24 @@
 
 CON
 
-    XTAL        = cfg#XTAL
-    XDIV        = cfg#XDIV
-    XMUL        = cfg#XMUL
-    XDIVP       = cfg#XDIVP
-    XOSC        = cfg#XOSC
-    XSEL        = cfg#XSEL
-    XPPPP       = cfg#XPPPP
-    CLOCKFREQ   = cfg#CLOCKFREQ
-    SETFREQ     = cfg#SETFREQ
-    ENAFREQ     = cfg#ENAFREQ
-
+    _clkmode    = cfg#_clkmode
+    _xinfreq    = cfg#_xinfreq
     LED         = cfg#LED1
-    SER_RX      = cfg#SER_RX
-    SER_TX      = cfg#SER_TX
-    SER_BAUD    = 2_000_000
+    SER_RX      = 31
+    SER_TX      = 30
+    SER_BAUD    = 115_200
 
-    I2C_SCL     = 27
-    I2C_SDA     = 28
+    I2C_SCL     = 28
+    I2C_SDA     = 29
     I2C_HZ      = 400_000
 
 OBJ
 
     ser         : "com.serial.terminal.ansi"
-    cfg         : "core.con.boardcfg.p2eval"
+    cfg         : "core.con.boardcfg.flip"
     io          : "io"
     time        : "time"
-    ina260      : "sensor.power.ina260.i2c.spin2"
+    ina260      : "sensor.power.ina260.i2c"
     int         : "string.integer"
 
 VAR
@@ -53,17 +44,17 @@ PUB Main
     repeat
         repeat until ina260.ConversionReady
         ser.Position(0, 5)
-        ser.printf("Current: ")
+        ser.str(string("Current: "))
         Frac(ina260.Current)
-        ser.printf("mA     \n")
+        ser.str(string("mA   ", ser#CR, ser#LF))
 
-        ser.printf("Voltage: ")
+        ser.str(string("Voltage: "))
         Frac(ina260.Voltage)
-        ser.printf("mV     \n")
+        ser.str(string("mV   ", ser#CR, ser#LF))
 
-        ser.printf("Power: ")
+        ser.str(string("Power: "))
         Frac(ina260.Power)
-        ser.printf("mW     \n")
+        ser.str(string("mW   ", ser#CR, ser#LF))
 
         if ser.RXCheck == "Q"                       ' Press captial Q to quit the demo
             ser.ShowCursor
@@ -77,21 +68,23 @@ PUB Frac(thousandths) | whole, part
 
     whole := thousandths / 1000
     part := int.DecZeroed(thousandths // 1000, 2)
-    ser.printf("%d.%s ", whole, part)
+    ser.dec(whole)
+    ser.char(".")
+    ser.str(part)
 
 PUB Setup
 
-    clkset(ENAFREQ, CLOCKFREQ, XSEL)
     repeat until _ser_cog := ser.StartRXTX (SER_RX, SER_TX, 0, SER_BAUD)
+    time.MSleep(30)
     ser.Clear
-    ser.PrintF("Serial terminal started\n")
-    if _ina260_cog := ina260.Start(I2C_SCL, I2C_SDA, I2C_HZ)
-        ser.Printf("INA260 driver started\n")
+    ser.str(string("Serial terminal started", ser#CR, ser#LF))
+    if _ina260_cog := ina260.Startx(I2C_SCL, I2C_SDA, I2C_HZ)
+        ser.str(string("INA260 driver started", ser#CR, ser#LF))
     else
-        ser.Printf("INA260 driver failed to start - halting\n")
+        ser.str(string("INA260 driver failed to start - halting", ser#CR, ser#LF))
         FlashLED(LED, 500)
 
-#include "lib.utility.spin2"
+#include "lib.utility.spin"
 
 DAT
 {
