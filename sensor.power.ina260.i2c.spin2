@@ -59,7 +59,8 @@ PUB Start(SCL_PIN, SDA_PIN, I2C_HZ=100_000): okay
             if okay := i2c.Setup (SCL_PIN, SDA_PIN, I2C_HZ)     'I2C Object Started?
                 time.MSleep (1)
                 if i2c.Present (SLAVE_WR)                       'Response from device?
-                    return okay
+                    if DeviceID == $2270_5449
+                        return okay
 
     return FALSE                                                'If we got here, something went wrong
 
