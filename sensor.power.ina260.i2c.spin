@@ -5,7 +5,7 @@
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
     Copyright (c) 2020
     Started Nov 13, 2019
-    Updated Jan 18, 2020
+    Updated Dec 5, 2020
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -88,8 +88,8 @@ PUB BusVoltage
 PUB ConversionReady
 ' Indicates data from the last conversion is available for reading
 '   Returns: TRUE if data available, FALSE otherwise
-    readReg(core#MASK_ENABLE, 2, @result)
-    result >>= core#FLD_CVRF
+    readReg(core#ENABLE, 2, @result)
+    result >>= core#CVRF
     result &= %1
     result *= TRUE
 
@@ -111,14 +111,14 @@ PUB CurrentConvTime(microseconds) | tmp
     readReg(core#CONFIG, 2, @tmp)
     case microseconds
         140, 204, 332, 588, 1100, 2116, 4156, 8244:
-            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#FLD_ISHCT
+            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#ISHCT
         OTHER:
-            tmp >>= core#FLD_ISHCT
-            tmp &= core#BITS_ISHCT
+            tmp >>= core#ISHCT
+            tmp &= core#ISHCT_BITS
             result := lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
             return result
 
-    tmp &= core#MASK_ISHCT
+    tmp &= core#ISHCT_MASK
     tmp := (tmp | microseconds) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
 
@@ -144,17 +144,17 @@ PUB IntLevel (level) | tmp
 '   Any other value polls the chip and returns the current setting
 '   NOTE: The ALERT pin is open collector
     tmp := $0000
-    readReg(core#MASK_ENABLE, 2, @tmp)
+    readReg(core#ENABLE, 2, @tmp)
     case level
         INTLVL_LO, INTLVL_HI:
-            level <<= core#FLD_APOL
+            level <<= core#APOL
         OTHER:
-            tmp >>= core#FLD_APOL
+            tmp >>= core#APOL
             return tmp
 
-    tmp &= core#MASK_APOL
-    tmp := (tmp | level) & core#MASK_ENABLE_MASK
-    writeReg(core#MASK_ENABLE, 2, @tmp)
+    tmp &= core#APOL_MASK
+    tmp := (tmp | level) & core#ENABLE_MASK
+    writeReg(core#ENABLE, 2, @tmp)
 
 PUB IntsLatched(enabled) | tmp
 ' Enable latching of interrupts
@@ -162,16 +162,16 @@ PUB IntsLatched(enabled) | tmp
 '       TRUE (-1 or 1): Active interrupts remain asserted until cleared manually
 '       FALSE (0): Active interrupts clear when the fault has been cleared
     tmp := $0000
-    readReg(core#MASK_ENABLE, 2, @tmp)
+    readReg(core#ENABLE, 2, @tmp)
     case ||enabled
         0, 1:
             enabled := ||enabled & %1
         OTHER:
             return (tmp & %1) * TRUE
 
-    tmp &= core#MASK_LEN
-    tmp := (tmp | enabled) & core#MASK_ENABLE_MASK
-    writeReg(core#MASK_ENABLE, 2, @tmp)
+    tmp &= core#LEN_MASK
+    tmp := (tmp | enabled) & core#ENABLE_MASK
+    writeReg(core#ENABLE, 2, @tmp)
 
 PUB IntSource (src) | tmp
 ' Set interrupt/alert pin assertion source
@@ -187,17 +187,17 @@ PUB IntSource (src) | tmp
 '               would trigger an alert when the bus voltage exceeded the set threshold
 '   Any other value polls the chip and returns the current setting
     tmp := $0000
-    readReg(core#MASK_ENABLE, 2, @tmp)
+    readReg(core#ENABLE, 2, @tmp)
     case src
         INT_CONV_READY, INT_POWER_HI, INT_BUSVOLT_LO, INT_BUSVOLT_HI, INT_CURRENT_LO, INT_CURRENT_HI:
-            src <<= core#FLD_ALERTS
+            src <<= core#ALERTS
         OTHER:
-            tmp >>= core#FLD_ALERTS
+            tmp >>= core#ALERTS
             return tmp
 
-    tmp &= core#MASK_ALERTS
-    tmp := (tmp | src) & core#MASK_ENABLE_MASK
-    writeReg(core#MASK_ENABLE, 2, @tmp)
+    tmp &= core#ALERTS_MASK
+    tmp := (tmp | src) & core#ENABLE_MASK
+    writeReg(core#ENABLE, 2, @tmp)
 
 PUB IntThresh(threshold) | tmp
 ' Set interrupt/alert threshold
@@ -237,10 +237,10 @@ PUB OpMode(mode) | tmp
         POWERDN, CURR_TRIGD, VOLT_TRIGD, CURR_VOLT_TRIGD, POWERDN2, CURR_CONT, VOLT_CONT, CURR_VOLT_CONT:
             mode := lookdownz(mode: POWERDN, CURR_TRIGD, VOLT_TRIGD, CURR_VOLT_TRIGD, POWERDN2, CURR_CONT, VOLT_CONT, CURR_VOLT_CONT)
         OTHER:
-            tmp &= core#BITS_MODE
+            tmp &= core#MODE_BITS
             return tmp
 
-    tmp &= core#MASK_MODE
+    tmp &= core#MODE_MASK
     tmp := (tmp | mode) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
 
@@ -255,15 +255,15 @@ PUB Power
 
 PUB PowerOverflowed
 ' Indicates the power data exceeded the maximum measurable value (419_430_000uW/419.43W)
-    readReg(core#MASK_ENABLE, 2, @result)
-    result >>= core#FLD_OVF
+    readReg(core#ENABLE, 2, @result)
+    result >>= core#OVF
     result &= %1
     result *= TRUE
 
 PUB Reset | tmp
 ' Reset the chip
 '   NOTE: Equivalent to Power-On Reset
-    tmp := 1 << core#FLD_RESET
+    tmp := 1 << core#RESET
     writeReg(core#CONFIG, 2, @tmp)
 
 PUB SamplesAveraged(samples) | tmp
@@ -274,14 +274,14 @@ PUB SamplesAveraged(samples) | tmp
     readReg(core#CONFIG, 2, @tmp)
     case samples
         1, 4, 16, 64, 128, 256, 512, 1024:
-            samples := lookdownz(samples: 1, 4, 16, 64, 128, 256, 512, 1024) << core#FLD_AVG
+            samples := lookdownz(samples: 1, 4, 16, 64, 128, 256, 512, 1024) << core#AVG
         OTHER:
-            tmp >>= core#FLD_AVG
-            tmp &= core#BITS_AVG
+            tmp >>= core#AVG
+            tmp &= core#AVG_BITS
             result := lookupz(tmp: 1, 4, 16, 64, 128, 256, 512, 1024)
             return result
 
-    tmp &= core#MASK_AVG
+    tmp &= core#AVG_MASK
     tmp := (tmp | samples) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
 
@@ -293,14 +293,14 @@ PUB VoltageConvTime(microseconds) | tmp
     readReg(core#CONFIG, 2, @tmp)
     case microseconds
         140, 204, 332, 588, 1100, 2116, 4156, 8244:
-            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#FLD_VBUSCT
+            microseconds := lookdownz(microseconds: 140, 204, 332, 588, 1100, 2116, 4156, 8244) << core#VBUSCT
         OTHER:
-            tmp >>= core#FLD_VBUSCT
-            tmp &= core#BITS_VBUSCT
+            tmp >>= core#VBUSCT
+            tmp &= core#VBUSCT_BITS
             result := lookupz(tmp: 140, 204, 332, 588, 1100, 2116, 4156, 8244)
             return result
 
-    tmp &= core#MASK_VBUSCT
+    tmp &= core#VBUSCT_MASK
     tmp := (tmp | microseconds) & core#CONFIG_MASK
     writeReg(core#CONFIG, 2, @tmp)
 
@@ -326,7 +326,7 @@ PRI writeReg(reg, nr_bytes, buff_addr) | cmd_packet, tmp
 '' Write num_bytes to the slave device from the address stored in buff_addr
     case reg                                                ' Basic register validation
         $00:
-            word[buff_addr][0] |= core#BITS_RSVD            ' Make sure the reserved bits are set correctly
+            word[buff_addr][0] |= core#RSVD_BITS            ' Make sure the reserved bits are set correctly
         $06, $07:
         OTHER:
             return
