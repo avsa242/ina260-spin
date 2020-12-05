@@ -28,7 +28,7 @@ P2/SPIN2:
 ## Compiler Compatibility
 
 * P1/SPIN1: OpenSpin (tested with 1.00.81)
-* P2/SPIN2: FastSpin (tested with 4.1.10-beta)
+* P2/SPIN2: FastSpin (tested with 5.0.0)
 * ~~BST~~ (incompatible - no preprocessor)
 * ~~Propeller Tool~~ (incompatible - no preprocessor)
 * ~~PNut~~ (incompatible - no preprocessor)
@@ -36,6 +36,8 @@ P2/SPIN2:
 ## Limitations
 
 * Very early in development - may malfunction, or outright fail to build
+* Doesn't support alternate slave addresses
+* Interrupt threshold parameter is currently a word, which isn't very intuitive
 
 ## TODO
 
@@ -43,4 +45,4 @@ P2/SPIN2:
 - [x] Implement methods for configuring the chip
 - [x] Implement methods for setting interrupts/alerts
 - [ ] Add support for alternate slave addresses
-- [ ] Modify the alert threshold setting to accept natural values rather than a raw word
+- [ ] Modify the interrupt threshold setting to accept natural values rather than a raw word
