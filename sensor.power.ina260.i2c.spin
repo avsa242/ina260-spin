@@ -3,9 +3,9 @@
     Filename: sensor.power.ina260.i2c.spin
     Author: Jesse Burt
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
-    Copyright (c) 2020
+    Copyright (c) 2021
     Started Nov 13, 2019
-    Updated Dec 5, 2020
+    Updated Jan 9, 2021
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -51,10 +51,10 @@ OBJ
     core: "core.con.ina260"
     time: "time"
 
-PUB Null
+PUB Null{}
 ' This is not a top-level object
 
-PUB Start: okay
+PUB Start{}: okay
 ' Start using "standard" Propeller I2C pins and 100kHz
     okay := startx(DEF_SCL, DEF_SDA, DEF_HZ)
 
@@ -87,7 +87,7 @@ PUB ConversionReady{}: flag
 ' Flag indicating data from the last conversion is available for reading
 '   Returns: TRUE (-1) if data available, FALSE (0) otherwise
     readreg(core#ENABLE, 2, @flag)
-    return ((flag >> core#CVRF) & %1) == 1
+    return (((flag >> core#CVRF) & 1) == 1)
 
 PUB Current{}: a
 ' Read the measured current, in microamperes
@@ -138,7 +138,7 @@ PUB IntLevel(level): curr_lvl
         INTLVL_LO, INTLVL_HI:
             level <<= core#APOL
         other:
-            return (curr_lvl >> core#APOL) & 1
+            return ((curr_lvl >> core#APOL) & 1)
 
     level := ((curr_lvl & core#APOL_MASK) | level) & core#ENABLE_MASK
     writereg(core#ENABLE, 2, @level)
@@ -154,7 +154,7 @@ PUB IntsLatched(state): curr_state
         0, 1:
             state := ||(state) & 1
         other:
-            return ((curr_state & %1) == 1)
+            return ((curr_state & 1) == 1)
 
     state := ((curr_state & core#LEN_MASK) | state) & core#ENABLE_MASK
     writereg(core#ENABLE, 2, @state)
@@ -241,7 +241,7 @@ PUB PowerOverflowed{}: flag
 ' Flag indicating power data exceeded the maximum measurable value
 '   (419_430_000uW/419.43W)
     readreg(core#ENABLE, 2, @flag)
-    return ((flag >> core#OVF) & 1) == 1
+    return (((flag >> core#OVF) & 1) == 1)
 
 PUB Reset{} | tmp
 ' Reset the chip
