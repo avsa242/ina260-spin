@@ -7,7 +7,7 @@ This is a P8X32A/Propeller 1, P2X8C4M64P/Propeller 2 driver object for the TI IN
 
 ## Salient Features
 
-* I2C connection at up to 400kHz (P1), _TBD_ (P2)
+* I2C connection at up to 400kHz (P1)
 * Read manufacturer ID, die ID
 * Read shunt current, bus voltage, calculated power
 * Set operation mode (one-shot/triggered, continuous, power-down)
@@ -27,8 +27,8 @@ P2/SPIN2:
 
 ## Compiler Compatibility
 
-* P1/SPIN1: OpenSpin (tested with 1.00.81)
-* P2/SPIN2: FastSpin (tested with 5.0.0)
+* P1/SPIN1: OpenSpin (tested with 1.00.81), FlexSpin (tested with 5.3.3-beta)
+* P2/SPIN2: FlexSpin (tested with 5.3.3-beta)
 * ~~BST~~ (incompatible - no preprocessor)
 * ~~Propeller Tool~~ (incompatible - no preprocessor)
 * ~~PNut~~ (incompatible - no preprocessor)
