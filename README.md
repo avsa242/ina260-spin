@@ -7,7 +7,7 @@ This is a P8X32A/Propeller 1, P2X8C4M64P/Propeller 2 driver object for the TI IN
 
 ## Salient Features
 
-* I2C connection at up to 400kHz (P1)
+* I2C connection at up to 400kHz (P1), with alternate address support
 * Read manufacturer ID, die ID
 * Read shunt current, bus voltage, calculated power
 * Set operation mode (one-shot/triggered, continuous, power-down)
@@ -27,8 +27,8 @@ P2/SPIN2:
 
 ## Compiler Compatibility
 
-* P1/SPIN1: OpenSpin (tested with 1.00.81), FlexSpin (tested with 5.3.3-beta)
-* P2/SPIN2: FlexSpin (tested with 5.3.3-beta)
+* P1/SPIN1: OpenSpin (tested with 1.00.81), FlexSpin (tested with 5.5.0)
+* P2/SPIN2: FlexSpin (tested with 5.5.0)
 * ~~BST~~ (incompatible - no preprocessor)
 * ~~Propeller Tool~~ (incompatible - no preprocessor)
 * ~~PNut~~ (incompatible - no preprocessor)
@@ -36,7 +36,6 @@ P2/SPIN2:
 ## Limitations
 
 * Very early in development - may malfunction, or outright fail to build
-* Doesn't support alternate slave addresses
 * Interrupt threshold parameter is currently a word, which isn't very intuitive
 
 ## TODO
@@ -44,5 +43,5 @@ P2/SPIN2:
 - [x] Implement methods for reading the three measurements
 - [x] Implement methods for configuring the chip
 - [x] Implement methods for setting interrupts/alerts
-- [ ] Add support for alternate slave addresses
+- [x] Add support for alternate slave addresses
 - [ ] Modify the interrupt threshold setting to accept natural values rather than a raw word
