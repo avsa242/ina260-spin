@@ -145,23 +145,23 @@ PUB DieID{}: id
     id := 0
     readreg(core#DIE_ID, 2, @id)
 
-PUB IntLevel(level): curr_lvl
+PUB IntActiveState(state): curr_state
 ' Set interrupt active level/polarity
 '   Valid values:
 '      *INTLVL_LO   (0) Active low
 '       INTLVL_HI   (1) Active high
 '   Any other value polls the chip and returns the current setting
 '   NOTE: The ALERT pin is open collector
-    curr_lvl := 0
-    readreg(core#ENABLE, 2, @curr_lvl)
-    case level
+    curr_state := 0
+    readreg(core#ENABLE, 2, @curr_state)
+    case state
         INTLVL_LO, INTLVL_HI:
-            level <<= core#APOL
+            state <<= core#APOL
         other:
-            return ((curr_lvl >> core#APOL) & 1)
+            return ((curr_state >> core#APOL) & 1)
 
-    level := ((curr_lvl & core#APOL_MASK) | level) & core#ENABLE_MASK
-    writereg(core#ENABLE, 2, @level)
+    state := ((curr_state & core#APOL_MASK) | state) & core#ENABLE_MASK
+    writereg(core#ENABLE, 2, @state)
 
 PUB IntsLatched(state): curr_state
 ' Enable latching of interrupts
