@@ -3,9 +3,9 @@
     Filename: sensor.power.ina260.i2c.spin
     Author: Jesse Burt
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
-    Copyright (c) 2021
+    Copyright (c) 2022
     Started Nov 13, 2019
-    Updated Aug 20, 2021
+    Updated Feb 16, 2022
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -51,12 +51,12 @@ CON
     CURR_VOLT_CONT  = %111
 
 ' Interrupt/alert pin sources
-    INT_CONV_READY  = 1
-    INT_POWER_HI    = 2
-    INT_BUSVOLT_LO  = 4
-    INT_BUSVOLT_HI  = 8
-    INT_CURRENT_LO  = 16
-    INT_CURRENT_HI  = 32
+    INT_CURRENT_HI  = 1 << 5
+    INT_CURRENT_LO  = 1 << 4
+    INT_BUSVOLT_HI  = 1 << 3
+    INT_BUSVOLT_LO  = 1 << 2
+    INT_POWER_HI    = 1 << 1
+    INT_CONV_READY  = 1 << 0
 
 ' Interrupt/alert pin level/polarity
     INTLVL_LO       = 0
@@ -163,6 +163,32 @@ PUB IntActiveState(state): curr_state
     state := ((curr_state & core#APOL_MASK) | state) & core#ENABLE_MASK
     writereg(core#ENABLE, 2, @state)
 
+PUB IntMask(mask): curr_mask
+' Set interrupt mask
+'   Valid values:
+'       Bits: 5..0
+'       5: Over current limit
+'       4: Under current limit
+'       3: Bus voltage over-voltage
+'       2: Bus voltage under-voltage
+'       1: Power over-limit
+'       0: Conversion ready
+'   Any other value polls the chip and returns the current setting
+'   NOTE: If multiple sources are enabled, the highest significant bit function
+'    takes priority
+'   NOTE: INT_ symbols can optionally be used to define sources
+'    (defined near top of this file)
+    curr_mask := 0
+    readreg(core#ENABLE, 2, @curr_mask)
+    case mask
+        %000000..%111111:
+            mask <<= core#ALERTS
+        other:
+            return (curr_mask >> core#ALERTS) & core#ALERTS_BITS
+
+    mask := ((curr_mask & core#ALERTS_MASK) | mask) & core#ENABLE_MASK
+    writereg(core#ENABLE, 2, @mask)
+
 PUB IntsLatched(state): curr_state
 ' Enable latching of interrupts
 '   Valid values:
@@ -178,31 +204,6 @@ PUB IntsLatched(state): curr_state
 
     state := ((curr_state & core#LEN_MASK) | state) & core#ENABLE_MASK
     writereg(core#ENABLE, 2, @state)
-
-PUB IntSource(src): curr_src
-' Set interrupt/alert pin assertion source
-'   Valid values:
-'       INT_CURRENT_HI  (32)    Over current limit
-'       INT_CURRENT_LO  (16)    Under current limit
-'       INT_BUSVOLT_HI  (8)     Bus voltage over-voltage
-'       INT_BUSVOLT_LO  (4)     Bus voltage under-voltage
-'       INT_POWER_HI    (2)     Power over-limit
-'       INT_CONV_READY  (1)     Conversion ready
-'       Example:
-'           IntSource(INT_BUSVOLT_HI) or IntSource(8)
-'               would trigger an alert when the bus voltage exceeded the set threshold
-'   Any other value polls the chip and returns the current setting
-    curr_src := 0
-    readreg(core#ENABLE, 2, @curr_src)
-    case src
-        INT_CONV_READY, INT_POWER_HI, INT_BUSVOLT_LO, INT_BUSVOLT_HI,{
-}       INT_CURRENT_LO, INT_CURRENT_HI:
-            src <<= core#ALERTS
-        other:
-            return (curr_src >> core#ALERTS) & core#ALERTS_BITS
-
-    src := ((curr_src & core#ALERTS_MASK) | src) & core#ENABLE_MASK
-    writereg(core#ENABLE, 2, @src)
 
 PUB IntThresh(thresh): curr_thr
 ' Set interrupt/alert threshold

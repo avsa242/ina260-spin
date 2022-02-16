@@ -2,10 +2,10 @@
     --------------------------------------------
     Filename: core.con.ina260.spin
     Author: Jesse Burt
-    Description: Low-level constants
-    Copyright (c) 2021
+    Description: INA260-specific Low-level constants
+    Copyright (c) 2022
     Started Nov 13, 2019
-    Updated May 16, 2021
+    Updated Feb 16, 2022
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -74,7 +74,7 @@ CON
         OVF_MASK        = (1 << OVF) ^ ENABLE_MASK
         APOL_MASK       = (1 << APOL) ^ ENABLE_MASK
         LEN_MASK        = (1 << LEN) ^ ENABLE_MASK
-        ALERTS_MASK     = ALERTS_BITS ^ ENABLE_MASK
+        ALERTS_MASK     = (ALERTS_BITS << ALERTS) ^ ENABLE_MASK
 
     ALERT_LIMIT         = $07
 
