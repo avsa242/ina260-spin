@@ -5,7 +5,7 @@
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
     Copyright (c) 2022
     Started Nov 13, 2019
-    Updated Aug 1, 2022
+    Updated Sep 21, 2022
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -99,6 +99,7 @@ PUB startx(SCL_PIN, SDA_PIN, I2C_HZ, ADDR_BITS): status
 PUB stop{}
 ' Stop the driver
     i2c.deinit{}
+    _addr_bits := 0
 
 PUB adc2amps(adc_word): a
 ' Convert current ADC word to amperage
@@ -326,7 +327,7 @@ PUB voltage_conv_time(ctime): curr_time
     ctime := ((curr_time & core#VBUSCT_MASK) | ctime) & core#CONFIG_MASK
     writereg(core#CONFIG, 2, @ctime)
 
-PRI readReg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
+PRI readreg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
 ' Read nr_bytes from the slave device into ptr_buff
     case reg_nr
         $00..$03, $06, $07, $fe, $ff:
@@ -342,7 +343,7 @@ PRI readReg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
         other:
             return
 
-PRI writeReg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
+PRI writereg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
 ' Write nr_bytes from ptr_buff to the slave device
     case reg_nr
         $00:
