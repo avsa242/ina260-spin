@@ -5,7 +5,7 @@
     Description: Driver for the TI INA260 Precision Current and Power Monitor IC
     Copyright (c) 2022
     Started Nov 13, 2019
-    Updated Sep 24, 2022
+    Updated Sep 29, 2022
     See end of file for terms of use.
     --------------------------------------------
 }
@@ -283,7 +283,7 @@ PUB reset{} | tmp
     tmp := core#SOFT_RES
     writereg(core#CONFIG, 2, @tmp)
 
-PUB samples_averaged(samples=-2): curr_smp
+PUB samples_avg(samples=-2): curr_smp
 ' Set number of samples used for averaging measurements
 '   Valid values: *1, 4, 16, 64, 128, 256, 512, 1024
 '   Any other value polls the chip and returns the current setting
