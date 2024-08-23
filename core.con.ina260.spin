@@ -1,12 +1,12 @@
 {
-    --------------------------------------------
-    Filename: core.con.ina260.spin
-    Author: Jesse Burt
-    Description: INA260-specific constants
-    Started Nov 13, 2019
-    Updated Jul 31, 2022
-    See end of file for terms of use.
-    --------------------------------------------
+----------------------------------------------------------------------------------------------------
+    Filename:       core.con.ina260.spin
+    Description:    INA260-specific constants 
+    Author:         Jesse Burt
+    Started:        Nov 13, 2019
+    Updated:        Aug 23, 2024
+    Copyright (c) 2024 - See end of file for terms of use.
+----------------------------------------------------------------------------------------------------
 }
 
 CON
@@ -84,12 +84,14 @@ CON
 
     DIE_ID              = $FF
 
-PUB null{}
+
+PUB null()
 ' This is not a top-level object
+
 
 DAT
 {
-Copyright (c) 2022 Jesse Burt
+Copyright (c) 2024 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
