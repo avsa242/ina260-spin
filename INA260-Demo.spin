@@ -31,6 +31,8 @@ OBJ
 
 pub main()
 
+    setup()
+
     repeat
         ser.pos_xy(0, 3)
         show_power_data()

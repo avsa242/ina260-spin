@@ -4,8 +4,8 @@
     Description:    Driver for the TI INA260 Precision Current and Power Monitor IC
     Author:         Jesse Burt
     Started:        Nov 13, 2019
-    Updated:        Aug 23, 2024
-    Copyright (c) 2024 - See end of file for terms of use.
+    Updated:        Feb 16, 2025
+    Copyright (c) 2025 - See end of file for terms of use.
 ----------------------------------------------------------------------------------------------------
 }
 
@@ -133,7 +133,7 @@ PUB adc2watts(adc_word): w
     return (adc_word * 10_000)
 
 
-PUB current_data(): a
+PUB current_data(ch=0): a
 ' Read the measured current, in microamperes
 '   NOTE: If averaging is enabled, this will return the averaged value
     a := 0
@@ -307,7 +307,7 @@ PUB opmode(mode=-2): curr_mode
             return curr_mode
 
 
-PUB power_data(): p
+PUB power_data(ch=0): p
 ' Read the power measured by the chip, in microwatts
 '   NOTE: If averaging is enabled, this will return the averaged value
 '   NOTE: The maximum value returned is 419_430_000
@@ -353,7 +353,7 @@ PUB samples_avg(samples=-2): curr_smp
             return lookupz(curr_smp: 1, 4, 16, 64, 128, 256, 512, 1024)
 
 
-PUB voltage_data(): v
+PUB voltage_data(ch=0): v
 ' Read the measured bus voltage, in microvolts
 '   NOTE: If averaging is enabled, this will return the averaged value
 '   NOTE: Full-scale range is 40_960_000uV
@@ -412,7 +412,7 @@ PRI writereg(reg_nr, nr_bytes, ptr_buff) | cmd_pkt
 
 DAT
 {
-Copyright (c) 2024 Jesse Burt
+Copyright (c) 2025 Jesse Burt
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
 associated documentation files (the "Software"), to deal in the Software without restriction,
